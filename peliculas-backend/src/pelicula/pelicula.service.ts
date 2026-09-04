@@ -13,7 +13,7 @@ export class PeliculaService {
 
   create(createPeliculaDto: CreatePeliculaDto) {
     return this.prisma.pelicula.create({
-      data: createPeliculaDto,
+      data: createPeliculaDto
     });
   }
 
@@ -23,20 +23,20 @@ export class PeliculaService {
 
   findOne(id: number) {
     return this.prisma.pelicula.findUnique({
-      where: { id },
+      where: { id }
     });
   }
 
   update(id: number, updatePeliculaDto: UpdatePeliculaDto) {
     return this.prisma.pelicula.update({
       where: { id },
-      data: updatePeliculaDto,
+      data: updatePeliculaDto
     });
   }
 
   remove(id: number) {
     return this.prisma.pelicula.delete({
-      where: { id },
+      where: { id }
     });
   }
 }
