@@ -17,8 +17,18 @@ export class PeliculaService {
     });
   }
 
-  findAll() {
-    return this.prisma.pelicula.findMany();
+  async findAll(nombre?: string, pagina = 1, limite = 5) {
+
+    const skip = (pagina -1) * limite;
+
+    const where = nombre ? { nombre: { contains: nombre, }, } : {};
+
+    const [peliculas, total] = await Promise.all([this.prisma.pelicula.findMany({ where, skip, take: limite, orderBy: { id: 'asc', },}),
+      this.prisma.pelicula.count({ where,}),
+    ]);
+
+
+    return { data: peliculas, meta: { pagina, limite, total, totalPaginas: Math.ceil(total / limite),},};
   }
 
   findOne(id: number) {
