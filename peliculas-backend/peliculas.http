@@ -37,7 +37,7 @@ PATCH {{baseUrl}}/pelicula/1
 Content-Type: application/json
 
 {
-    "nombre": "Pelicula: Maze Runner: Pruebas de Fuego"
+    "imagen": "https://static.wikia.nocookie.net/mazerunner/images/0/08/P%C3%B3ster_de_Prueba_de_Fuego.png/revision/latest?cb=20150519191652&path-prefix=es"
 }
 
 ### 5. Eliminar una Pelicula 
