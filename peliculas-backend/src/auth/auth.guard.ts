@@ -17,26 +17,53 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // 1. Primero revisa si la ruta tiene la nota de @Public()
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
+
+    const request = context.switchToHttp().getRequest();
+    const authHeader = request.headers.authorization;
+    const token = this.extractTokenFromHeader(request);
+
+    console.log('[AuthGuard] Validando acceso', {
+      method: request.method,
+      url: request.originalUrl,
+      hasAuthorizationHeader: Boolean(authHeader),
+      hasToken: Boolean(token),
+      tokenPreview: token ? `${token.slice(0, 12)}...` : null,
+      isPublic,
+    });
+
     if (isPublic) {
-      return true; // si es pública, deja pasar sin pedir token
+      return true;
     }
 
-    // 2. Si no es pública, sigue la validación normal del token
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      console.error('[AuthGuard] Acceso denegado: falta token en Authorization header', {
+        method: request.method,
+        url: request.originalUrl,
+        headers: request.headers,
+      });
+      throw new UnauthorizedException('Falta token de autenticación');
     }
+
     try {
       const payload = await this.jwtService.verifyAsync(token);
       request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException();
+      console.log('[AuthGuard] Token válido', {
+        method: request.method,
+        url: request.originalUrl,
+        user: payload,
+      });
+    } catch (error) {
+      console.error('[AuthGuard] Acceso denegado: token inválido o expirado', {
+        method: request.method,
+        url: request.originalUrl,
+        tokenPreview: token ? `${token.slice(0, 12)}...` : null,
+        error: error instanceof Error ? error.message : error,
+      });
+      throw new UnauthorizedException('Token inválido o expirado');
     }
     return true;
   }

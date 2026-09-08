@@ -1,25 +1,52 @@
-
 import { Injectable } from '@nestjs/common';
+import { createHash, randomBytes } from 'node:crypto';
+import { PrismaService } from '../prisma/prisma.service.js';
 
-// This should be a real class/interface representing a user entity
-export type User = any;
+export type User = {
+  id: number;
+  nombre: string;
+  email: string;
+  password: string;
+};
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString('hex');
+  const hash = createHash('sha256').update(password + salt).digest('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(password: string, storedPassword: string): boolean {
+  const separatorIndex = storedPassword.indexOf(':');
+  if (separatorIndex === -1) {
+    return false;
+  }
+
+  const salt = storedPassword.slice(0, separatorIndex);
+  const storedHash = storedPassword.slice(separatorIndex + 1);
+  const candidateHash = createHash('sha256').update(password + salt).digest('hex');
+
+  return candidateHash === storedHash;
+}
 
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'nicolas',
-      password: 'pokemon1',
-    },
-    {
-      userId: 2,
-      username: 'david',
-      password: 'pokemon2',
-    },
-  ];
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find(user => user.username === username);
+  async create(data: { nombre: string; email: string; password: string }): Promise<User> {
+    return this.prisma.user.create({
+      data,
+    });
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+  }
+
+  async findOne(id: number): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 }

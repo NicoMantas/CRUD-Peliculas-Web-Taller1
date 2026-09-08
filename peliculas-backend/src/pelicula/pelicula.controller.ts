@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { PeliculaService } from './pelicula.service.js';
 import { CreatePeliculaDto } from './dto/create-pelicula.dto.js';
 import { UpdatePeliculaDto } from './dto/update-pelicula.dto.js';
+import { Public } from '../auth/decorators/public.decorators.js';
 
 @Controller('pelicula')
 export class PeliculaController {
@@ -12,6 +13,7 @@ export class PeliculaController {
     return this.peliculaService.create(createPeliculaDto);
   }
 
+  @Public()
   @Get()
   findAll(
     @Query('nombre') nombre?: string,
@@ -25,6 +27,7 @@ export class PeliculaController {
     );
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.peliculaService.findOne(+id);

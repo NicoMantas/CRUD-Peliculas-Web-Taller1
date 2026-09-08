@@ -124,6 +124,16 @@ Content-Type: application/json
     "imagen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBA47aC-q1I7TGYANnv4oaQ0sKAyuA-BhjnfRmSAjWc5MdohUFAxfW5lmt&s=10"
 }
 
+### 12. Crear Pelicula 12
+POST {{baseUrl}}/pelicula
+Content-Type: application/json
+
+{
+    "nombre": "Spider",
+    "sinopsis": "A medida que las exigencias a las que se ve sometido Spider-Man se intensifican, la presión desencadena una sorprendente evolución física que pone en peligro su existencia.",
+    "imagen": "https://m.media-amazon.com/images/M/MV5BZjJhYjA3NzMtMWExNC00OTMwLWIyY2YtOGIzODhlYWI0ZWY1XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
+}
+
 ### 13. Obtener una Pelicula por ID
 GET {{baseUrl}}/pelicula/1
 
