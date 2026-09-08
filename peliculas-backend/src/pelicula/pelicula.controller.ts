@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PeliculaService } from './pelicula.service.js';
 import { CreatePeliculaDto } from './dto/create-pelicula.dto.js';
 import { UpdatePeliculaDto } from './dto/update-pelicula.dto.js';
@@ -13,8 +13,16 @@ export class PeliculaController {
   }
 
   @Get()
-  findAll() {
-    return this.peliculaService.findAll();
+  findAll(
+    @Query('nombre') nombre?: string,
+    @Query('pagina') pagina?: string,
+    @Query('limite') limite?: string,
+  ) {
+    return this.peliculaService.findAll(
+      nombre,
+      Number(pagina) || 1,
+      Number(limite) || 5,
+    );
   }
 
   @Get(':id')
