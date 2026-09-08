@@ -21,20 +21,18 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const token = localStorage.getItem('jwt_token');
 
   if (to.meta.requiresAuth && !token) {
-    next({ name: 'login' });
-    return;
+    return { name: 'login' };
   }
 
   if ((to.name === 'login' || to.name === 'register') && token) {
-    next({ name: 'home' });
-    return;
+    return { name: 'home' };
   }
 
-  next();
+  return true;
 });
 
 export default router;

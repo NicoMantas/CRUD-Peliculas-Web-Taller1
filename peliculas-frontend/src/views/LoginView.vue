@@ -30,7 +30,7 @@ async function login() {
     localStorage.setItem('usuario', JSON.stringify(data.usuario));
     router.push('/home');
   } catch (err) {
-    error.value = err.message || 'No se pudo iniciar sesión';
+    error.value = err?.message || 'No se pudo iniciar sesión';
   }
 }
 </script>

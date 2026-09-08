@@ -32,7 +32,7 @@ async function register() {
     localStorage.setItem('usuario', JSON.stringify(data.usuario));
     router.push('/home');
   } catch (err) {
-    error.value = err.message || 'No se pudo registrar';
+    error.value = err?.message || 'No se pudo registrar';
   }
 }
 </script>

@@ -1,68 +1,91 @@
 const API_URL = 'http://localhost:3000/pelicula';
 
-export async function ObtenerPeliculas(nombre = '', pagina = 1, limite = 5) {
-    const parametros = new URLSearchParams({
-        pagina: pagina.toString(),
-        limite: limite.toString(),
-    });
+function getAuthHeaders(extraHeaders = {}) {
+  const token = localStorage.getItem('jwt_token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...extraHeaders,
+  };
 
-    if (nombre.trim()) {
-        parametros.set('nombre', nombre.trim());
-    }
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
-    const respuesta = await fetch(`${API_URL}?${parametros.toString()}`);
-
-    if (!respuesta.ok) {
-        throw new Error('Error al tratar de obtener las peliculas');
-    }
-
-    return respuesta.json();
+  return headers;
 }
 
-export async function ObtenerPelicula(nombre = '', pagina = 1, limite = 5) {
-    return ObtenerPeliculas(nombre, pagina, limite);
+async function apiFetch(url, options = {}) {
+  const token = localStorage.getItem('jwt_token');
+  const method = options.method || 'GET';
+
+  console.log('[Frontend API] Request', {
+    url,
+    method,
+    hasToken: Boolean(token),
+    tokenPreview: token ? `${token.slice(0, 12)}...` : null,
+    body: options.body || null,
+  });
+
+  const respuesta = await fetch(url, options);
+
+  console.log('[Frontend API] Response', {
+    url,
+    method,
+    status: respuesta.status,
+    statusText: respuesta.statusText,
+    ok: respuesta.ok,
+  });
+
+  if (!respuesta.ok) {
+    const text = await respuesta.text();
+    console.error('[Frontend API] Error HTTP', {
+      url,
+      method,
+      status: respuesta.status,
+      statusText: respuesta.statusText,
+      responseBody: text,
+    });
+
+    throw new Error(`Error al tratar de obtener las peliculas (${respuesta.status}: ${respuesta.statusText})`);
+  }
+
+  return respuesta.json();
+}
+
+export async function ObtenerPeliculas(nombre = '', pagina = 1, limite = 5) {
+  const parametros = new URLSearchParams({
+    pagina: pagina.toString(),
+    limite: limite.toString(),
+  });
+
+  if (nombre.trim()) {
+    parametros.set('nombre', nombre.trim());
+  }
+
+  return apiFetch(`${API_URL}?${parametros.toString()}`, {
+    headers: getAuthHeaders(),
+  });
 }
 
 export async function CrearPelicula(pelicula) {
-    const respuesta = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pelicula),
-    });
-
-    if (!respuesta.ok) {
-        throw new Error('Error al crear la pelicula');
-    }
-
-    return respuesta.json();
+  return apiFetch(API_URL, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(pelicula),
+  });
 }
 
 export async function ActualizarPelicula(id, pelicula) {
-    const respuesta = await fetch(`${API_URL}/${id}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(pelicula)
-    });
-
-    if (!respuesta.ok) {
-        throw new Error('Error al actualizar la pelicula');
-    }
-
-    return respuesta.json();
+  return apiFetch(`${API_URL}/${id}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(pelicula),
+  });
 }
 
 export async function EliminarPelicula(id) {
-    const respuesta = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
-    });
-
-    if (!respuesta.ok) {
-        throw new Error('Error al eliminar la pelicula');
-    }
-
-    return respuesta.json();
+  return apiFetch(`${API_URL}/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
 }
